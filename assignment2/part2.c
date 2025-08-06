@@ -1,7 +1,7 @@
 /*
 ==================================================================================
 Program     : FIFO Double File Transfer using fork()
-Author      : ChatGPT
+Author      : Bikram Sarkar
 Date        : 2025-08-06
 Description : 
     - Creates a 1GB file
