@@ -1,39 +1,67 @@
-/*
-==================================================================================
-Program     : FIFO Double File Transfer using fork()
-Author      : Bikram Sarkar
-Date        : 2025-08-06
-Description : 
-    - Creates a 1GB file
-    - Uses fork() to create child
-    - Parent writes file to child through FIFO1
-    - Child sends it back through FIFO2
-    - Final file is compared with the original
-    - Time taken for transfer is printed
-
-Commands used (outputs shown below):
-------------------------------------
-1. File creation:
-    dd if=/dev/urandom of=original_file bs=1M count=1024
-
-2. FIFO creation:
-    mkfifo fifo1
-    mkfifo fifo2
-
-3. File comparison:
-    cmp original_file received_file
-
-4. ls -l:
-    -rw-r--r-- 1 user user 1073741824 Aug  6 14:00 original_file
-    prw-r--r-- 1 user user         0 Aug  6 14:00 fifo1
-    prw-r--r-- 1 user user         0 Aug  6 14:00 fifo2
-    -rw-r--r-- 1 user user 1073741824 Aug  6 14:00 received_file
-
-5. Time taken:
-    Time taken for round-trip transfer: X.XXX seconds
-==================================================================================
-*/
-
+/********************************************************************
+*   Group:A2
+*   Team:08
+*   Date: 07-08-2025
+*   Assignment-2B
+*
+*   Name: Partha Roy ,      Roll-302411001004 
+*   Name: Bikram Sarkar ,   Roll-302411001008
+*   Name: Bikram Dutta,     Roll-002311001071
+*
+*Compilation Command-
+*   gcc A2_08_2B.c -o A2_08_2B
+*
+*Execution Command-
+*   ./A2_08_2B
+*
+*HostName-
+*   kiertolainen
+* 
+*Sample Output:-
+*   Successfull Execution-
+*       prw-r--r-- 1 kiertolainen kiertolainen          0 Aug  7 14:11 fifo1
+*       prw-r--r-- 1 kiertolainen kiertolainen          0 Aug  7 14:11 fifo2
+*       -rw-r--r-- 1 kiertolainen kiertolainen 1073741824 Aug  7 14:11 original_file
+*       -rw-r--r-- 1 kiertolainen kiertolainen        511 Aug  7 13:29 part1.c
+*       -rw-r--r-- 1 kiertolainen kiertolainen 1073741824 Aug  7 14:11 received_file
+*       Files match. Transfer successful.
+*       Time taken for round-trip transfer: xx seconds
+*
+*   Unsucssefull Execution-
+*       Files do NOT match.
+*
+*Actual Output-
+*    total 2097208
+*    -rwxr-xr-x 1 kiertolainen kiertolainen      16656 Aug  7 14:11 A2_08_2B
+*    -rw-r--r-- 1 kiertolainen kiertolainen       4078 Aug  7 14:11 A2_08_2B.c
+*    -rwxr-xr-x 1 kiertolainen kiertolainen      16656 Aug  7 13:54 a.out
+*    prw-r--r-- 1 kiertolainen kiertolainen          0 Aug  7 14:11 fifo1
+*    prw-r--r-- 1 kiertolainen kiertolainen          0 Aug  7 14:11 fifo2
+*    -rw-r--r-- 1 kiertolainen kiertolainen 1073741824 Aug  7 14:11 original_file
+*    -rw-r--r-- 1 kiertolainen kiertolainen        511 Aug  7 13:29 part1.c
+*    -rw-r--r-- 1 kiertolainen kiertolainen 1073741824 Aug  7 14:11 received_file
+*    Files match. Transfer successful.
+*    Time taken for round-trip transfer: 4.816 seconds
+*    total 2097208
+*    -rwxr-xr-x 1 kiertolainen kiertolainen      16656 Aug  7 14:11 A2_08_2B
+*    -rw-r--r-- 1 kiertolainen kiertolainen       4078 Aug  7 14:11 A2_08_2B.c
+*    -rwxr-xr-x 1 kiertolainen kiertolainen      16656 Aug  7 13:54 a.out
+*    -rw-r--r-- 1 kiertolainen kiertolainen 1073741824 Aug  7 14:11 original_file
+*    -rw-r--r-- 1 kiertolainen kiertolainen        511 Aug  7 13:29 part1.c
+*    -rw-r--r-- 1 kiertolainen kiertolainen 1073741824 Aug  7 14:11 received_file
+*
+*System Command Used-
+*   'dd' to create a 1GB demo file.
+*   'mkfifo' is used to create the fifos.
+*   'ls -l' is used to show the file and fifo details.
+*   'cmp' is used to compare the original file and the recived file.
+*FIFO names-
+*   Parent fifo- fifo1
+*   Child fifo- fifo2
+*File Names-
+*   Sended file- original_file
+*   Received file- received_file
+*********************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -50,42 +78,41 @@ Commands used (outputs shown below):
 #define FILE2 "received_file"
 #define BUFFER_SIZE 4096
 
-/*this fuction is used for the purpose of wrapping error massege using perror()
-it exits the program if anything fails*/
+// Error handler: prints message and exits
 void error_exit(const char *msg) {
     perror(msg);
-    exit(EXIT_FAILURE);1073741824 Augues if the fifo files already exists
+    exit(EXIT_FAILURE);
+}
+
+int main() {
+    // Create FIFO files (if not already exist)
     if (mkfifo(FIFO1, 0666) == -1 && errno != EEXIST)
         error_exit("mkfifo fifo1");
 
     if (mkfifo(FIFO2, 0666) == -1 && errno != EEXIST)
         error_exit("mkfifo fifo2");
 
-    /* Create 1GB file using dd command. This could be done in the terminal for the file to be used in code. If a file with that same name already exists it 'dd' will overwrite it without any warning*/
+    // Create 1GB random file using dd
     system("dd if=/dev/urandom of=original_file bs=1M count=1024 status=none");
-    
-    //pid_t is a data type that is used to store process IDs
+
     pid_t pid;
     char buffer[BUFFER_SIZE];
-    
     struct timespec start, end;
+    //starting the timer
     clock_gettime(CLOCK_MONOTONIC, &start);
-    
-    //fork() is used to create a child process
+
     pid = fork();
     if (pid < 0) {
         error_exit("fork");
-    }
-    else if (pid == 0) {
-        // this is Child Process
-        int readfd = open(FIFO1, O_RDONLY); // wait for Parent to write in Readonly mode
-        int tempfd = open("temp_file", O_WRONLY | O_CREAT | O_TRUNC, 0644); //tempfd temporarily hold onto the data received from FIFO01
+    } else if (pid == 0) {
+        // Child Process
+        int readfd = open(FIFO1, O_RDONLY); 
+        int tempfd = open("temp_file", O_WRONLY | O_CREAT | O_TRUNC, 0644);
 
         if (readfd == -1 || tempfd == -1)
             error_exit("child: open fifo1/temp_file");
 
         ssize_t bytes;
-        //Reads data from the FIFO01 in chunks and writes to temp_file.
         while ((bytes = read(readfd, buffer, BUFFER_SIZE)) > 0) {
             write(tempfd, buffer, bytes);
         }
@@ -93,7 +120,6 @@ void error_exit(const char *msg) {
         close(readfd);
         close(tempfd);
 
-        // Send back to parent using fifo2
         int writefd = open(FIFO2, O_WRONLY);
         tempfd = open("temp_file", O_RDONLY);
 
@@ -107,9 +133,8 @@ void error_exit(const char *msg) {
         close(writefd);
         close(tempfd);
 
-        unlink("temp_file"); // temporary file is deleted
-    }
-    else {
+        unlink("temp_file");
+    } else {
         // Parent Process
         int writefd = open(FIFO1, O_WRONLY);
         int filefd = open(FILE1, O_RDONLY);
@@ -125,7 +150,6 @@ void error_exit(const char *msg) {
         close(writefd);
         close(filefd);
 
-        // Read back from child via fifo2
         int readfd = open(FIFO2, O_RDONLY);
         int outfd = open(FILE2, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 
@@ -139,26 +163,26 @@ void error_exit(const char *msg) {
         close(readfd);
         close(outfd);
 
-        wait(NULL); // Wait for child
+        wait(NULL); //Waiting for child to finish
 
-        // End time
+        //ending the timer and getting the transfer time
         clock_gettime(CLOCK_MONOTONIC, &end);
-        double time_taken = (end.tv_sec - start.tv_sec) + 
+        double time_taken = (end.tv_sec - start.tv_sec) +
                             (end.tv_nsec - start.tv_nsec) / 1e9;
-
-        // Compare the two files
+        
+        //comparing the files
         int cmp_result = system("cmp original_file received_file");
 
         if (cmp_result == 0) {
-            printf("✅ Files match. Transfer successful.\n");
+            printf("Files match. Transfer successful.\n");
         } else {
-            printf("❌ Files do NOT match.\n");
+            printf("Files do NOT match.\n");
         }
 
-        printf("⏱️ Time taken for round-trip transfer: %.3f seconds\n", time_taken);
+        printf("Time taken for round-trip transfer: %.3f seconds\n", time_taken);
     }
-
-    // Cleanup of the FIFO
+    system("ls -l");
+    //Unlinking the fifos to free up memory
     unlink(FIFO1);
     unlink(FIFO2);
 
