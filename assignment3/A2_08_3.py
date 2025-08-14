@@ -2,16 +2,58 @@
 # Assignment-3
 # Group:A2
 # Team:08
-#
+
 # Name: Partha Roy ,      Roll-302411001004 
 # Name: Bikram Sarkar ,   Roll-302411001008
 # Name: Bikram Dutta,     Roll-002311001071
-#
-# Execution Command-
+
+# What this Program Does-
+# parallel program in Python which will do Matrix Multiplication between
+# two large Square Matrices with unsigned integer elements
+
+# Sample Execution Command-
 #    python A2_08_3.py <Dimension> <Threads> <mod_value> <print_switch>
-#
-#
-#
+# Actual Execution Command-
+#    python A2_08_3.py 5 4 10 1
+
+# Sample Output-
+#     generating 2, n X n matrix
+#     Starting parallel matrix multiplication...
+#     Starting The Timer
+#     [PID xx ] Processing row xx
+#     [PID xx ] Processing row xx
+#     [PID xx ] Processing row xx
+#     [PID xx ] Processing row xx
+#     [PID xx ] Processing row xx
+#     Matrix multiplication completed in xx.xx seconds
+#     HERE IS RESULT MATRIX:
+#     [xx, xx, .......]
+#     [xx, xx, .......]
+#     [xx, xx, .......]
+#     [xx, xx, .......]
+#     [xx, xx, .......]
+#     ....
+#     ....
+# Actual Output-
+#     generating 2, 5 X 5 matrix
+#     Starting parallel matrix multiplication...
+#     Starting The Timer
+#     [PID 24492] Processing row 0
+#     [PID 24492] Processing row 1
+#     [PID 24492] Processing row 2
+#     [PID 24492] Processing row 3
+#     [PID 24492] Processing row 4
+#     Matrix multiplication completed in 0.13 seconds
+#     HERE IS RESULT MATRIX:
+#     [86, 28, 80, 49, 55]
+#     [107, 7, 86, 99, 121]
+#     [127, 13, 100, 115, 136]
+#     [175, 42, 151, 111, 132]
+#     [154, 33, 130, 118, 129]
+
+# System Command used-
+#     cpustat - 
+
 
 
 import multiprocessing
