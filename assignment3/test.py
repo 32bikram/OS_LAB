@@ -18,6 +18,7 @@ import multiprocessing
 import random
 import time
 import argparse
+import os
 
 parser = argparse.ArgumentParser(description="Example script")
 parser.add_argument("Dimension",type = int, help="Add dimension of matrix")
@@ -26,18 +27,25 @@ parser.add_argument("mod_value", type = int, help = "mod_value")
 parser.add_argument("print_switch", type = int, help=" this is print switch")
 args = parser.parse_args()
 
+
 def fun(args):
     row_index, row, B = args
+    
+    # Print the PID of the process running this function
+    print(f"[PID {os.getpid()}] Processing row {row_index}")
+
     row_length = len(row)
     B_col_len = len(B[0])
     results = []
-    temp = 0
+    
     for i in range(B_col_len):
         temp = 0
         for j in range(len(B)):
-                temp += (row[j]*B[j][i])
+            temp += (row[j] * B[j][i])
         results.append(temp)
-    return (row_index,results)
+    
+    return (row_index, results)
+
 def generate_matrix(n, mod_val):
     return[[random.randint(0, 2**31-1) % mod_val for _ in range(n)] for _ in range(n)]
 if __name__ == "__main__":
