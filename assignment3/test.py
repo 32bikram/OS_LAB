@@ -1,3 +1,19 @@
+# DATE: 14-08-2025
+# Assignment-3
+# Group:A2
+# Team:08
+#
+# Name: Partha Roy ,      Roll-302411001004 
+# Name: Bikram Sarkar ,   Roll-302411001008
+# Name: Bikram Dutta,     Roll-002311001071
+#
+# Execution Command-
+#    python A2_08_3.py <Dimension> <Threads> <mod_value> <print_switch>
+#
+#
+#
+
+
 import multiprocessing
 import random
 import time
