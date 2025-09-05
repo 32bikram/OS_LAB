@@ -15,7 +15,7 @@
         then stores and displays the results in a synchronized tabular format.
 
  *  Compilation Command-
-        gcc A2_08_05.c -o A2_08_05 -lpthread -lrt
+        gcc A2_08_05.c -o A2_08_05
 
  *  Command To check Shared Memory Status-
         ipcs -m
